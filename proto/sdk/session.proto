@@ -1,0 +1,137 @@
+syntax = "proto3";
+package karo.sdk;
+
+import "sdk/common.proto";
+import "karo/v1/rpc.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/sdk;sdk";
+
+message SdkCommand {
+
+  uint64 request_id = 1;
+
+  oneof command {
+
+    SdkHandshakeRequest handshake = 10;
+
+    SdkPingCommand ping = 20;
+
+    SdkSubscribeCommand subscribe = 30;
+    SdkUnsubscribeCommand unsubscribe = 31;
+
+    karo.v1.Request rpc = 50;
+  }
+}
+
+message SdkResponse {
+
+  uint64 request_id = 1;
+
+  bool success = 2;
+
+  SdkErrorCode error_code = 3;
+
+  string message = 4;
+
+  uint64 server_timestamp_ms = 5;
+
+  oneof payload {
+
+    SdkHandshakeResponse handshake = 10;
+
+    karo.v1.Response rpc = 11;
+
+    SdkSubscribeAck subscribe = 12;
+  }
+}
+
+message SdkTopicPush {
+
+  string topic = 1;
+
+  uint64 timestamp_ms = 2;
+
+  bytes payload = 3;
+
+  uint64 seq = 4;
+}
+
+message SdkHandshakeRequest {
+
+  string sdk_version = 1;
+
+  string client_id = 2;
+
+  oneof auth {
+
+    bytes certificate_der = 10;
+
+    bytes access_token = 11;
+  }
+}
+
+message SdkHandshakeResponse {
+
+  string protocol_version = 1;
+
+  string robot_sn = 2;
+  string robot_model = 3;
+
+  SdkCapabilitySet granted_capabilities = 4;
+
+  repeated SdkTopicDescriptor available_topics = 5;
+
+  string session_token = 6;
+}
+
+message SdkPingCommand {
+
+  uint64 client_timestamp_ms = 1;
+}
+
+message SdkSubscribeCommand {
+
+  string topic = 1;
+
+  float desired_hz = 2;
+
+  uint64 since_seq = 3;
+
+  uint32 history_limit = 4;
+}
+
+message SdkUnsubscribeCommand {
+
+  string topic = 1;
+}
+
+message SdkSubscribeAck {
+
+  string topic = 1;
+
+  bool accepted = 2;
+
+  SdkSubscribeRejectReason reject_reason = 3;
+
+  uint64 next_seq = 4;
+
+  string message = 5;
+}
+
+enum SdkSubscribeRejectReason {
+
+  SUBSCRIBE_REJECT_NONE = 0;
+
+  SUBSCRIBE_REJECT_TOPIC_NOT_FOUND = 1;
+
+  SUBSCRIBE_REJECT_CAPABILITY_DENIED = 2;
+
+  SUBSCRIBE_REJECT_ALREADY_SUBSCRIBED = 3;
+
+  SUBSCRIBE_REJECT_INVALID_HZ = 4;
+
+  SUBSCRIBE_REJECT_HISTORY_TOO_OLD = 10;
+
+  SUBSCRIBE_REJECT_REPLAY_NOT_SUPPORTED = 11;
+}
+

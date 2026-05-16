@@ -1,0 +1,35 @@
+@PACKAGE_INIT@
+
+# KaroSDK CMake package config.
+#
+# 用法:
+#   find_package(KaroSDK CONFIG REQUIRED)
+#   target_link_libraries(my_app PRIVATE KaroSDK::karo_sdk_cpp)
+#
+# 命名约定:
+#   - package name:   KaroSDK (PascalCase, find_package 入口)
+#   - imported target: KaroSDK::karo_sdk_cpp (静态库)
+#   - artifact file:   libkaro_sdk_cpp.a (与 in-tree library target 同名)
+
+include(CMakeFindDependencyMacro)
+
+# 与库内 .a 静态链接的 PUBLIC 依赖一一对应; 漏一个 → 客户 link 时 undefined reference.
+find_dependency(Threads)
+find_dependency(Boost 1.71)
+find_dependency(OpenSSL)
+find_dependency(Protobuf)
+
+# absl 是 build 时探测的: protobuf 7.34+ 把 absl::hash 等拆出来, 我们 PUBLIC link 进
+# karo_sdk_cpp; 老 protobuf (3.x) 没 absl. 只有 build 时真用了 absl, 客户 install
+# 时才必须有 absl — 否则 find_dependency 会让 KaroSDK 整个 NOT_FOUND, 即便客户
+# 用的是兼容 install 的老 protobuf 也会被卡住 (codex review v3.2.1 P1).
+#
+# @absl_FOUND@ 在 configure_package_config_file 时把 build 时探测结果替换进来.
+set(KaroSDK_WITH_ABSL "@absl_FOUND@")
+if(KaroSDK_WITH_ABSL)
+  find_dependency(absl)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/KaroSDKTargets.cmake")
+
+check_required_components(KaroSDK)

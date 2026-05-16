@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/rpc.proto";
+import "karo/v1/stream.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+message TransportFrame {
+  oneof body {
+    Request       request       = 1;
+    Response      response      = 2;
+    StreamEvent   stream_event  = 3;
+    Subscribe     subscribe     = 4;
+    Unsubscribe   unsubscribe   = 5;
+    SubscribeAck  subscribe_ack = 6;
+  }
+
+  optional uint32 sender_id = 7;
+}
+

@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/common.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+service SafetyService {
+
+  rpc EmergencyStop(EmergencyStopRequest) returns (EmergencyStopResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "safety.emergency_stop";
+  }
+}
+
+message EmergencyStopRequest {
+
+  bool activate = 1;
+}
+
+message EmergencyStopResponse {
+
+  uint64 timestamp_ms = 1;
+
+  bool stopped = 2;
+}
+
