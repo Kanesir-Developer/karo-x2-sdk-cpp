@@ -1,0 +1,49 @@
+syntax = "proto3";
+package karo.sdk.v1;
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/sdk/v1;sdkv1";
+
+message SdkRobotStateUpdate {
+
+  string robot_id = 1;
+  uint32 health_score = 2;
+  uint64 sequence = 3;
+
+  uint32 battery_level = 4;
+
+  enum ChargeType {
+    CHARGE_TYPE_NONE = 0;
+    CHARGE_TYPE_WIRE = 1;
+    CHARGE_TYPE_DOCK = 2;
+  }
+  ChargeType charge_type = 5;
+
+  enum ServiceState {
+    SERVICE_STATE_IDLE = 0;
+    SERVICE_STATE_TASK = 1;
+    SERVICE_STATE_MAPPING = 2;
+    SERVICE_STATE_STARTING = 3;
+    SERVICE_STATE_SHUTTING_DOWN = 4;
+    SERVICE_STATE_UPGRADING = 5;
+    SERVICE_STATE_REMOTE_CONTROL = 6;
+    SERVICE_STATE_GOTO_CHARGING = 7;
+  }
+  ServiceState service_state = 6;
+
+  bool is_estop = 12;
+  bool is_hw_estop = 26;
+  bool is_sw_estop = 27;
+
+  repeated uint32 errors = 13;
+
+  string active_map_id = 14;
+  string active_map_name = 15;
+  int32 active_floor = 16;
+
+  string current_task_id = 18;
+
+  uint64 uptime_seconds = 23;
+  uint64 idle_seconds = 24;
+  uint64 charging_seconds = 25;
+}
+

@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/common.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+service ControlService {
+
+  rpc CmdVel(CmdVelRequest) returns (CmdVelResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (rate_limit_key) = "control.cmd_vel";
+  }
+}
+
+message Vector3 {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message Twist {
+  Vector3 linear = 1;
+  Vector3 angular = 2;
+}
+
+message CmdVelRequest {
+
+  Twist twist = 1;
+
+  uint64 sequence = 2;
+
+  uint64 timestamp_ms = 3;
+}
+
+message CmdVelResponse {
+
+  bool accepted = 1;
+
+  uint64 device_timestamp_ms = 2;
+}
+

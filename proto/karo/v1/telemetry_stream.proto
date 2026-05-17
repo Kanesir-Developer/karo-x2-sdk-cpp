@@ -1,0 +1,462 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/tasks.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+message PowerStatusUpdate {
+
+  float charge_voltage = 1;
+  float battery_voltage = 2;
+  float battery_current = 3;
+  float host_current = 4;
+  float head_current = 5;
+  float motor_current = 6;
+  float other_current = 7;
+  float lift_current = 8;
+
+  uint32 battery_capacity = 9;
+  uint32 charger_connected_notice = 10;
+
+  bool charger_touch_flag = 11;
+  bool io_charge_state = 12;
+  bool float_charge_protect = 13;
+  bool float_charge_protect_is_on = 14;
+  bool bat_charge_enable = 15;
+  bool underpan_peripheral_power_switch_io = 16;
+
+  uint32 soc_method = 17;
+  uint32 soc_expect_method = 18;
+
+  uint32 io_status = 19;
+  uint32 err_status = 20;
+}
+
+message MotorStatusUpdate {
+
+  repeated DriveMotorBoardSnapshot drive_boards = 1;
+
+  repeated SteeringMotorSnapshot steering_motors = 2;
+}
+
+message DriveMotorBoardSnapshot {
+  string board_id = 1;
+  uint32 board_node_id = 2;
+
+  uint32 left_odometry = 3;
+  uint32 right_odometry = 4;
+  int32 left_speed = 5;
+  int32 right_speed = 6;
+  int32 left_current = 7;
+  int32 right_current = 8;
+  int32 left_target_speed = 9;
+  uint32 reset_reason = 10;
+
+  repeated DriveMotorFaultSnapshot motor_faults = 11;
+
+  bool spin_lock_error = 20;
+  bool over_rad = 21;
+  bool over_diffspd = 22;
+  bool over_highload = 23;
+  bool over_midload = 24;
+  bool over_lowload = 25;
+  bool commu_r_timeout = 26;
+
+  bool emergency_stop_hw = 30;
+  bool emergency_stop_sw = 31;
+  bool emergency_free_hw = 32;
+  bool emergency_free_sw = 33;
+  bool over_voltage = 34;
+  bool under_voltage = 35;
+  bool drive_disable = 36;
+  uint32 motor_type = 37;
+  uint32 pwm_state = 38;
+  bool emg_free_abolish = 39;
+  uint32 zero_spd_mod = 40;
+}
+
+message DriveMotorFaultSnapshot {
+  string motor_id = 1;
+  bool block_rotor = 2;
+  bool over_current_hw = 3;
+  bool e_angle_error = 4;
+  bool hall_error = 5;
+  bool over_spd = 6;
+  bool over_current = 7;
+  bool current_offset_error = 8;
+  bool angle_offset_error = 9;
+  bool angle_value_error = 10;
+  bool encoder_link_error = 11;
+  bool hall_link_error = 12;
+  bool over_temp_error = 13;
+  bool e_angle_fault = 14;
+  bool encoderpulse_lost_flag = 15;
+  bool tem_disconnected = 16;
+}
+
+message SteeringMotorSnapshot {
+  string motor_id = 1;
+  uint32 node_id = 2;
+  double position = 3;
+  float velocity = 4;
+  float current = 5;
+  float temperature = 6;
+}
+
+message RobotStateUpdate {
+  string robot_id = 1;
+  uint32 health_score = 2;
+  uint64 sequence = 3;
+
+  uint32 battery_level = 4;
+
+  enum ChargeType {
+    CHARGE_TYPE_NONE = 0;
+    CHARGE_TYPE_WIRE = 1;
+    CHARGE_TYPE_DOCK = 2;
+  }
+  ChargeType charge_type = 5;
+
+  enum ServiceState {
+    SERVICE_STATE_IDLE = 0;
+    SERVICE_STATE_TASK = 1;
+    SERVICE_STATE_MAPPING = 2;
+    SERVICE_STATE_STARTING = 3;
+    SERVICE_STATE_SHUTTING_DOWN = 4;
+    SERVICE_STATE_UPGRADING = 5;
+    SERVICE_STATE_REMOTE_CONTROL = 6;
+    SERVICE_STATE_GOTO_CHARGING = 7;
+  }
+  ServiceState service_state = 6;
+
+  string task_id = 10;
+  string task_status = 11;
+  bool is_estop = 12;
+
+  repeated uint32 errors = 13;
+
+  string active_map_id = 14;
+  string active_map_name = 15;
+  int32 active_floor = 16;
+
+  uint32 current_task_type = 17;
+  string current_task_id = 18;
+  string current_task_target = 19;
+  float current_task_planned_distance = 20;
+  float current_task_traveled_distance = 21;
+  uint64 current_task_eta_timestamp_ms = 22;
+
+  uint64 uptime_seconds = 23;
+  uint64 idle_seconds = 24;
+  uint64 charging_seconds = 25;
+
+  bool is_hw_estop = 26;
+  bool is_sw_estop = 27;
+
+  repeated FirmwareVersionEntry firmware_versions = 30;
+
+  TaskState current_task_state = 31;
+  TaskPauseReason current_task_pause_reason = 32;
+}
+
+message FirmwareVersionEntry {
+  string app_code = 1;
+  uint32 node_id = 2;
+  string model_name = 3;
+  string firmware_version = 4;
+  string hardware_version = 5;
+  string serial_number = 6;
+}
+
+message SafetyStateUpdate {
+  uint32 code = 1;
+  uint32 level = 2;
+  uint32 severity = 3;
+  string mode = 4;
+  string polygon = 5;
+  string policy_version = 6;
+  string active_source = 7;
+}
+
+message FaultEventBatchUpdate {
+  repeated FaultEventEntry events = 1;
+}
+
+enum FaultEventOpKind {
+  FAULT_EVENT_OP_KIND_ADD = 0;
+  FAULT_EVENT_OP_KIND_REMOVE = 1;
+}
+
+message FaultEventEntry {
+
+  uint32 error_code = 1;
+  FaultEventOpKind op = 2;
+  int64 event_seq = 3;
+  int64 occurred_at_ms = 4;
+  int32 duration_ms = 5;
+  string context = 6;
+  string source = 7;
+}
+
+message TfUpdate {
+  repeated TransformStampedSnapshot transforms = 1;
+}
+
+message TfStaticUpdate {
+  repeated TransformStampedSnapshot transforms = 1;
+}
+
+message TransformStampedSnapshot {
+
+  uint64 timestamp_ns = 1;
+  string frame_id = 2;
+  string child_frame_id = 3;
+
+  double translation_x = 4;
+  double translation_y = 5;
+  double translation_z = 6;
+
+  double rotation_x = 7;
+  double rotation_y = 8;
+  double rotation_z = 9;
+  double rotation_w = 10;
+}
+
+message FootprintUpdate {
+  repeated Point2DSnapshot points = 1;
+  uint64 timestamp_ms = 2;
+}
+
+message Point2DSnapshot {
+  double x = 1;
+  double y = 2;
+}
+
+message NavPathUpdate {
+  repeated NavPathPointSnapshot points = 1;
+  uint64 timestamp_ms = 2;
+}
+
+message NavPathPointSnapshot {
+  float x = 1;
+  float y = 2;
+}
+
+message NetworkStatusUpdate {
+  ModemInfoSnapshot modem = 1;
+  WifiInfoSnapshot wifi = 2;
+
+  uint32 wifi_scan_cooldown_seconds = 3;
+}
+
+message ModemInfoSnapshot {
+  string manufacturer = 1;
+  string model = 2;
+  string imei = 3;
+  string imsi = 4;
+  string operator_name = 5;
+  uint32 signal_quality = 6;
+  string state = 7;
+  string access_tech = 8;
+  string ip_address = 9;
+  bool is_connected = 10;
+
+  int32 rssi = 11;
+  int32 rsrp = 12;
+  int32 rsrq = 13;
+  int32 snr = 14;
+  string iccid = 15;
+}
+
+message WifiInfoSnapshot {
+  bool is_connected = 1;
+  string ssid = 2;
+  string ip_address = 3;
+  int32 signal_strength = 4;
+  uint32 frequency = 5;
+}
+
+message UltrasonicUpdate {
+  float front_left = 1;
+  float front_right = 2;
+  float rear_left = 3;
+  float rear_right = 4;
+}
+
+message ChargingDockCandidatesUpdate {
+  repeated ChargingDockCandidateSnapshot candidates = 1;
+}
+
+message ChargingDockCandidateSnapshot {
+  string id = 1;
+  double x = 2;
+  double y = 3;
+  double theta = 4;
+  uint64 detected_at_ms = 5;
+  uint32 source = 6;
+}
+
+message DetectedObjectsUpdate {
+  string frame_id = 1;
+  uint64 timestamp_ms = 2;
+  repeated DetectedObject3DSnapshot objects = 3;
+}
+
+message DetectedObject3DSnapshot {
+  string class_name = 1;
+  float confidence = 2;
+  float pos_x = 3;
+  float pos_y = 4;
+  float pos_z = 5;
+  float dim_w = 6;
+  float dim_h = 7;
+  float dim_d = 8;
+  float yaw = 9;
+  float bbox_x1 = 10;
+  float bbox_y1 = 11;
+  float bbox_x2 = 12;
+  float bbox_y2 = 13;
+  uint32 track_id = 14;
+  uint32 track_state = 15;
+  bool from_lidar = 16;
+}
+
+message LocalizationStatusUpdate {
+
+  uint64 stamp_ms = 1;
+
+  bool is_localizing = 2;
+  string map_id = 3;
+
+  bool pose_valid = 10;
+  float pose_x = 11;
+  float pose_y = 12;
+  float pose_theta = 13;
+
+  float scan_match_score = 20;
+  uint64 last_match_age_ms = 21;
+
+  uint32 alarm_level = 30;
+  string alarm_reason = 31;
+}
+
+message MappingStatusUpdate {
+  MappingStateKind state = 1;
+  string map_name = 2;
+  int32 floor = 3;
+  string message = 4;
+  string error = 5;
+  float scan_match_score = 6;
+  bool localization_anomaly = 7;
+  string map_id = 8;
+}
+
+enum MappingStateKind {
+  MAPPING_STATE_KIND_IDLE = 0;
+  MAPPING_STATE_KIND_STARTING = 1;
+  MAPPING_STATE_KIND_RUNNING = 2;
+  MAPPING_STATE_KIND_SAVING = 3;
+  MAPPING_STATE_KIND_COMPLETED = 4;
+  MAPPING_STATE_KIND_FAILED = 5;
+  MAPPING_STATE_KIND_LOCALIZING = 6;
+}
+
+message MapUpdateNotice {
+
+  float resolution = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+  double origin_x = 4;
+  double origin_y = 5;
+
+  bytes map_data = 6;
+  CompressionTypeKind compression = 7;
+
+  uint64 timestamp_ms = 8;
+}
+
+enum CompressionTypeKind {
+  COMPRESSION_TYPE_KIND_NONE = 0;
+  COMPRESSION_TYPE_KIND_ZLIB = 1;
+}
+
+message MotorCurrentUpdate {
+  uint64 timestamp_ms = 1;
+
+  float drive_front_left = 2;
+  float drive_front_right = 3;
+  float drive_rear_left = 4;
+  float drive_rear_right = 5;
+
+  float steering_fl = 6;
+  float steering_fr = 7;
+  float steering_rl = 8;
+  float steering_rr = 9;
+}
+
+message LogUpdate {
+  uint32 level = 1;
+  string name = 2;
+  string msg = 3;
+  string file = 4;
+  string function = 5;
+  uint32 line = 6;
+}
+
+message LaserScanUpdate {
+
+  string frame_id = 1;
+  uint64 timestamp_ns = 2;
+
+  float angle_min = 3;
+  float angle_max = 4;
+  float angle_increment = 5;
+  float time_increment = 6;
+  float scan_time = 7;
+  float range_min = 8;
+  float range_max = 9;
+
+  repeated float ranges = 10;
+  repeated float intensities = 11;
+}
+
+enum ImageEncodingKind {
+  IMAGE_ENCODING_KIND_JPEG = 0;
+  IMAGE_ENCODING_KIND_DEPTH_COLORIZED_JPEG = 1;
+  IMAGE_ENCODING_KIND_PNG16 = 2;
+}
+
+message ImageFrameUpdate {
+  string stream_id = 1;
+  string camera_topic = 2;
+  uint64 stamp_ns = 3;
+  uint32 seq = 4;
+  uint32 width = 5;
+  uint32 height = 6;
+  ImageEncodingKind encoding = 7;
+  bytes data = 8;
+}
+
+message SystemStateUpdate {
+
+  uint32 phase = 1;
+
+  uint32 readiness = 2;
+
+  float boot_progress = 3;
+
+  string blocking_components = 4;
+
+  int64 phase_age_ms = 5;
+
+  int64 last_phase_transition_ms = 6;
+
+  string last_degrade_reason = 7;
+
+  int64 stamp_ms = 8;
+}
+
