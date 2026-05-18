@@ -1,0 +1,125 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/common.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+message Request {
+  uint64 id = 1;
+  string method = 2;
+  uint64 deadline_ms = 3;
+  map<string, string> metadata = 4;
+  bytes payload = 5;
+}
+
+message Response {
+  uint64 id = 1;
+  ErrorCode code = 2;
+  string message = 3;
+  bytes payload = 4;
+  map<string, string> metadata = 5;
+}
+
+service SystemService {
+
+  rpc Ping(PingRequest) returns (PingResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "system.ping";
+  }
+
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "system.authenticate";
+  }
+
+  rpc ReportQuality(ReportQualityRequest) returns (ReportQualityResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_STANDARD;
+    option (idempotent) = true;
+    option (rate_limit_key) = "system.report_quality";
+  }
+}
+
+message PingRequest {
+  int64 client_timestamp_ms = 1;
+  bytes echo = 2;
+}
+
+message PingResponse {
+  int64 client_timestamp_ms = 1;
+  int64 server_timestamp_ms = 2;
+  bytes echo = 3;
+  string device_sn = 4;
+  string protocol_version = 5;
+}
+
+message ClientIdentity {
+  enum ClientType {
+    CLIENT_TYPE_UNSPECIFIED = 0;
+    CLIENT_TYPE_IOT_AGENT = 1;
+    CLIENT_TYPE_DESKTOP_APP = 2;
+    CLIENT_TYPE_MOBILE_APP = 3;
+    CLIENT_TYPE_THIRD_PARTY_SDK = 4;
+    CLIENT_TYPE_CLI_TOOL = 5;
+    CLIENT_TYPE_INTERNAL_TEST = 6;
+  }
+  ClientType client_type = 1;
+
+  string client_name = 2;
+
+  string client_version = 3;
+  string instance_id = 4;
+  string os = 5;
+}
+
+message AuthenticateRequest {
+
+  bytes access_token = 1;
+  ClientIdentity client_identity = 2;
+}
+
+message AuthenticateResponse {
+  uint64 user_id = 1;
+  uint32 expires_at = 2;
+  string device_sn = 3;
+  string protocol_version = 4;
+}
+
+message QualityHint {
+
+  float rtt_ms = 1;
+
+  float loss_pct = 2;
+
+  uint32 bandwidth_kbps = 3;
+
+  uint32 buffer_lag_ms = 4;
+
+  uint32 client_score = 5;
+
+  string transport = 6;
+}
+
+message ReportQualityRequest {
+  QualityHint hint = 1;
+
+  int64 client_timestamp_ms = 2;
+}
+
+message ReportQualityResponse {
+
+  QualityTier server_tier = 1;
+
+  uint32 server_score = 2;
+
+  uint32 next_report_interval_ms = 3;
+}
+
