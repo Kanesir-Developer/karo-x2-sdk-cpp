@@ -1,0 +1,204 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/common.proto";
+import "karo/v1/tasks.proto";
+import "karo/v1/patrol.proto";
+import "karo/v1/maps.proto";
+import "karo/v1/markers.proto";
+import "karo/v1/nogo_zones.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+message TaskCreatedEvent {
+  Task task = 1;
+}
+
+message TaskUpdatedEvent {
+  Task task = 1;
+}
+
+message TaskStateChangedEvent {
+  string task_id = 1;
+  TaskType task_type = 2;
+  TaskState old_state = 3;
+  TaskState new_state = 4;
+  int64 timestamp_ms = 5;
+  ErrorCode error_code = 6;
+  string error_message = 7;
+}
+
+message TaskDeletedEvent {
+  string task_id = 1;
+}
+
+message TaskEventEnvelope {
+  oneof kind {
+    TaskCreatedEvent created = 1;
+    TaskUpdatedEvent updated = 2;
+    TaskStateChangedEvent state_changed = 3;
+    TaskDeletedEvent deleted = 4;
+  }
+}
+
+message PatrolRouteCreatedEvent {
+  PatrolRoute route = 1;
+}
+
+message PatrolRouteUpdatedEvent {
+  PatrolRoute route = 1;
+}
+
+message PatrolRouteDeletedEvent {
+  string route_id = 1;
+}
+
+message PatrolRouteEventEnvelope {
+  oneof kind {
+    PatrolRouteCreatedEvent created = 1;
+    PatrolRouteUpdatedEvent updated = 2;
+    PatrolRouteDeletedEvent deleted = 3;
+  }
+}
+
+message PatrolMarkerStartEvent {
+  string task_id = 1;
+  uint32 marker_index = 2;
+  string marker_id = 3;
+  string marker_name = 4;
+  uint32 current_loop = 5;
+  uint32 total_loops = 6;
+
+  double goal_x = 7;
+  double goal_y = 8;
+  double goal_theta = 9;
+}
+
+message PatrolMarkerReachedEvent {
+  string task_id = 1;
+  uint32 marker_index = 2;
+  string marker_id = 3;
+  string marker_name = 4;
+  uint32 dwell_time_sec = 5;
+  uint32 current_loop = 6;
+  uint32 completed_markers_in_loop = 7;
+}
+
+message PatrolFeedbackEvent {
+  string task_id = 1;
+  uint32 marker_index = 2;
+
+  double current_x = 3;
+  double current_y = 4;
+  double current_theta = 5;
+
+  double distance_remaining = 6;
+  double estimated_time_remaining = 7;
+  double total_distance_traveled = 8;
+}
+
+message PatrolLoopCompletedEvent {
+  string task_id = 1;
+  uint32 completed_loops = 2;
+  uint32 total_loops = 3;
+}
+
+message PatrolReturningEvent {
+  string task_id = 1;
+  string charging_marker_id = 2;
+  bool low_battery_triggered = 3;
+}
+
+message PatrolFailedEvent {
+  string task_id = 1;
+  ErrorCode error_code = 2;
+  string error_message = 3;
+  int32 nav2_error_code = 4;
+}
+
+message PatrolEventEnvelope {
+  oneof kind {
+    PatrolMarkerStartEvent marker_start = 1;
+    PatrolMarkerReachedEvent marker_reached = 2;
+    PatrolFeedbackEvent feedback = 3;
+    PatrolLoopCompletedEvent loop_completed = 4;
+    PatrolReturningEvent returning = 5;
+    PatrolFailedEvent failed = 6;
+  }
+}
+
+message MapCreatedEvent {
+  Map map = 1;
+}
+
+message MapUpdatedEvent {
+  Map map = 1;
+}
+
+message MapDeletedEvent {
+  string map_id = 1;
+}
+
+message MapActivatedEvent {
+
+  Map map = 1;
+
+  string previous_map_id = 2;
+
+  int64 timestamp_ms = 3;
+}
+
+message MapEventEnvelope {
+  oneof kind {
+    MapCreatedEvent created = 1;
+    MapUpdatedEvent updated = 2;
+    MapDeletedEvent deleted = 3;
+    MapActivatedEvent activated = 4;
+  }
+}
+
+message MarkerCreatedEvent {
+  Marker marker = 1;
+}
+
+message MarkerUpdatedEvent {
+  Marker marker = 1;
+}
+
+message MarkerDeletedEvent {
+  string marker_id = 1;
+  string map_id = 2;
+}
+
+message MarkerEventEnvelope {
+  oneof kind {
+    MarkerCreatedEvent created = 1;
+    MarkerUpdatedEvent updated = 2;
+    MarkerDeletedEvent deleted = 3;
+  }
+}
+
+message NogoZoneCreatedEvent {
+  NogoZone zone = 1;
+}
+
+message NogoZoneUpdatedEvent {
+  NogoZone zone = 1;
+}
+
+message NogoZoneDeletedEvent {
+  string zone_id = 1;
+  string map_id = 2;
+}
+
+message NogoZoneEventEnvelope {
+  oneof kind {
+    NogoZoneCreatedEvent created = 1;
+    NogoZoneUpdatedEvent updated = 2;
+    NogoZoneDeletedEvent deleted = 3;
+  }
+}
+

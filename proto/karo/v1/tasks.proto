@@ -1,0 +1,181 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/common.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+enum TaskType {
+  TASK_TYPE_UNSPECIFIED = 0;
+  TASK_TYPE_NAVIGATION = 1;
+  TASK_TYPE_PATROL = 2;
+  TASK_TYPE_GO_BACK = 3;
+  TASK_TYPE_MOTOR_TEST = 100;
+}
+
+enum TaskState {
+  TASK_STATE_UNSPECIFIED = 0;
+  TASK_STATE_PENDING = 1;
+  TASK_STATE_RUNNING = 2;
+  TASK_STATE_PAUSED = 3;
+  TASK_STATE_CANCELLING = 4;
+  TASK_STATE_SUCCEEDED = 10;
+  TASK_STATE_FAILED = 11;
+  TASK_STATE_CANCELLED = 12;
+}
+
+enum TaskCategory {
+  TASK_CATEGORY_UNSPECIFIED = 0;
+  TASK_CATEGORY_BUSINESS = 1;
+  TASK_CATEGORY_DEBUG = 2;
+}
+
+enum TaskCancelReason {
+  TASK_CANCEL_REASON_UNSPECIFIED = 0;
+  TASK_CANCEL_REASON_USER = 1;
+  TASK_CANCEL_REASON_ESTOP = 2;
+  TASK_CANCEL_REASON_TIMEOUT = 3;
+  TASK_CANCEL_REASON_PAUSE_TIMEOUT = 4;
+  TASK_CANCEL_REASON_RESUME_FAILED = 5;
+  TASK_CANCEL_REASON_ERROR = 6;
+}
+
+enum TaskPauseReason {
+  TASK_PAUSE_REASON_UNSPECIFIED = 0;
+  TASK_PAUSE_REASON_USER = 1;
+  TASK_PAUSE_REASON_ESTOP = 2;
+}
+
+enum BagUploadState {
+  BAG_UPLOAD_STATE_UNSPECIFIED = 0;
+  BAG_UPLOAD_STATE_PENDING = 1;
+  BAG_UPLOAD_STATE_UPLOADING = 2;
+  BAG_UPLOAD_STATE_UPLOADED = 3;
+  BAG_UPLOAD_STATE_FAILED = 4;
+}
+
+enum GoBackMode {
+  GO_BACK_MODE_UNSPECIFIED = 0;
+  GO_BACK_MODE_NEAREST = 1;
+  GO_BACK_MODE_NAV_TO_POINT = 2;
+}
+
+message MoveTaskDetails {
+  string marker_id = 1;
+  string marker_name = 2;
+  double goal_x = 3;
+  double goal_y = 4;
+  double goal_theta = 5;
+  double planned_distance = 6;
+  double distance_traveled = 7;
+}
+
+message PatrolTaskDetails {
+  string route_id = 1;
+  string route_name = 2;
+  uint32 total_waypoints = 3;
+  uint32 completed_waypoints = 4;
+  uint32 lap_count = 5;
+  double distance_traveled = 6;
+}
+
+message GoBackTaskDetails {
+  GoBackMode mode = 1;
+  string charging_marker_id = 2;
+  double approach_distance = 3;
+
+  string docking_phase_at_failure = 4;
+  double final_lat_offset = 5;
+  double final_yaw_offset = 6;
+  uint32 engage_charge_breaks = 7;
+}
+
+message MotorTestTaskDetails {
+  double linear_x = 1;
+  double linear_y = 2;
+  double angular_z = 3;
+  double duration = 4;
+  double frequency = 5;
+  string preset_name = 6;
+}
+
+message Task {
+  option (entity_class) = ENTITY_CLASS_REACTIVE;
+
+  string task_id = 1;
+  TaskType task_type = 2;
+  TaskCategory category = 3;
+
+  TaskState state = 10;
+  TaskCancelReason cancel_reason = 11;
+  TaskPauseReason pause_reason = 12;
+
+  uint64 created_at_ms = 20;
+  uint64 started_at_ms = 21;
+  uint64 completed_at_ms = 22;
+
+  ErrorCode error_code = 30;
+  string error_message = 31;
+
+  string rosbag_path = 40;
+  BagUploadState bag_upload_state = 41;
+  uint32 bag_upload_progress = 42;
+  string bag_oss_key = 43;
+
+  oneof details {
+    MoveTaskDetails move = 100;
+    PatrolTaskDetails patrol = 101;
+    GoBackTaskDetails go_back = 102;
+    MotorTestTaskDetails motor_test = 103;
+  }
+}
+
+service TasksService {
+
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "tasks.list";
+  }
+
+  rpc GetTask(GetTaskRequest) returns (GetTaskResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "tasks.get";
+  }
+}
+
+message ListTasksRequest {
+
+  uint32 page = 1;
+  uint32 page_size = 2;
+
+  repeated TaskType task_type_filter = 10;
+  repeated TaskState state_filter = 11;
+
+  uint64 created_after_ms = 20;
+  uint64 created_before_ms = 21;
+
+  string keyword = 30;
+}
+
+message ListTasksResponse {
+  repeated Task tasks = 1;
+  uint32 total_count = 2;
+  uint32 page = 3;
+  uint32 page_size = 4;
+}
+
+message GetTaskRequest {
+  string task_id = 1;
+}
+
+message GetTaskResponse {
+  Task task = 1;
+}
+

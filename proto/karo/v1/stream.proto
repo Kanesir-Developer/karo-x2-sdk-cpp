@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/common.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+message StreamEvent {
+  string topic = 1;
+  uint64 seq = 2;
+  int64 timestamp_ms = 3;
+  bytes payload = 4;
+  map<string, string> metadata = 5;
+
+  QualityTier server_tier = 6;
+}
+
+message Subscribe {
+  repeated string topics = 1;
+  QosClass qos = 2;
+  uint64 since_seq = 3;
+  uint32 history_limit = 4;
+
+  QualityTier max_tier = 5;
+
+  QualityTier preferred_tier = 6;
+}
+
+message Unsubscribe {
+  repeated string topics = 1;
+}
+
+message SubscribeAck {
+  repeated string topics_accepted = 1;
+  repeated string topics_rejected = 2;
+  ErrorCode code = 3;
+  string message = 4;
+}
+
+message PoseUpdate {
+
+  double x = 1;
+  double y = 2;
+  double z = 3;
+
+  double qx = 4;
+  double qy = 5;
+  double qz = 6;
+  double qw = 7;
+
+  double vx = 8;
+  double vy = 9;
+  double wz = 10;
+
+  double cov_xx = 11;
+  double cov_yy = 12;
+  double cov_yaw = 13;
+}
+

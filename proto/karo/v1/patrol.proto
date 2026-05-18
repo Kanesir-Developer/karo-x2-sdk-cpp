@@ -1,0 +1,188 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/common.proto";
+import "karo/v1/tasks.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+message PatrolWaypoint {
+  string marker_id = 1;
+  uint32 dwell_time_sec = 2;
+}
+
+message PatrolRoute {
+  option (entity_class) = ENTITY_CLASS_REACTIVE;
+
+  string route_id = 1;
+  string name = 2;
+  repeated PatrolWaypoint waypoints = 3;
+
+  uint64 created_at_ms = 10;
+  uint64 updated_at_ms = 11;
+}
+
+service PatrolService {
+
+  rpc ListPatrolRoutes(ListPatrolRoutesRequest) returns (ListPatrolRoutesResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "patrol.list_routes";
+  }
+
+  rpc GetPatrolRoute(GetPatrolRouteRequest) returns (GetPatrolRouteResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "patrol.get_route";
+  }
+
+  rpc CreatePatrolRoute(CreatePatrolRouteRequest) returns (CreatePatrolRouteResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+
+    option (idempotent) = false;
+    option (rate_limit_key) = "patrol.create_route";
+  }
+
+  rpc UpdatePatrolRoute(UpdatePatrolRouteRequest) returns (UpdatePatrolRouteResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+
+    option (idempotent) = true;
+    option (rate_limit_key) = "patrol.update_route";
+  }
+
+  rpc DeletePatrolRoute(DeletePatrolRouteRequest) returns (DeletePatrolRouteResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "patrol.delete_route";
+  }
+
+  rpc CreateTask(CreatePatrolTaskRequest) returns (CreatePatrolTaskResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+
+    option (idempotent) = false;
+    option (rate_limit_key) = "patrol.create_task";
+  }
+}
+
+message ListPatrolRoutesRequest {
+
+  uint32 page = 1;
+  uint32 page_size = 2;
+
+  string keyword = 10;
+}
+
+message ListPatrolRoutesResponse {
+  repeated PatrolRoute routes = 1;
+  uint32 total_count = 2;
+  uint32 page = 3;
+  uint32 page_size = 4;
+}
+
+message GetPatrolRouteRequest {
+  string route_id = 1;
+}
+
+message GetPatrolRouteResponse {
+  PatrolRoute route = 1;
+}
+
+message CreatePatrolRouteRequest {
+  string name = 1;
+  repeated PatrolWaypoint waypoints = 2;
+}
+
+message CreatePatrolRouteResponse {
+  PatrolRoute route = 1;
+}
+
+message UpdatePatrolRouteRequest {
+  string route_id = 1;
+  string name = 2;
+  repeated PatrolWaypoint waypoints = 3;
+}
+
+message UpdatePatrolRouteResponse {
+  PatrolRoute route = 1;
+}
+
+message DeletePatrolRouteRequest {
+  string route_id = 1;
+}
+
+message DeletePatrolRouteResponse {
+
+}
+
+message CreatePatrolTaskRequest {
+
+  string route_id = 1;
+  uint32 loop_count = 2;
+  bool return_to_charger = 3;
+  bool low_battery_return = 4;
+
+  repeated PatrolWaypoint waypoints = 5;
+}
+
+message CreatePatrolTaskResponse {
+  Task task = 1;
+}
+
+service TaskActionsService {
+  rpc CancelTask(CancelTaskRequest) returns (CancelTaskResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "task_actions.cancel";
+  }
+
+  rpc PauseTask(PauseTaskRequest) returns (PauseTaskResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "task_actions.pause";
+  }
+
+  rpc ResumeTask(ResumeTaskRequest) returns (ResumeTaskResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "task_actions.resume";
+  }
+}
+
+message CancelTaskRequest {
+  string task_id = 1;
+
+  TaskCancelReason reason = 2;
+}
+
+message CancelTaskResponse {
+  Task task = 1;
+}
+
+message PauseTaskRequest {
+  string task_id = 1;
+}
+
+message PauseTaskResponse {
+  Task task = 1;
+}
+
+message ResumeTaskRequest {
+  string task_id = 1;
+}
+
+message ResumeTaskResponse {
+  Task task = 1;
+}
+

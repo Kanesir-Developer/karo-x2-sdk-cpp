@@ -1,0 +1,127 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/common.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+enum ZoneShape {
+  ZONE_SHAPE_UNSPECIFIED = 0;
+  ZONE_SHAPE_LINE = 1;
+  ZONE_SHAPE_POLYGON = 2;
+}
+
+enum ZoneCategory {
+  ZONE_CATEGORY_UNSPECIFIED = 0;
+  ZONE_CATEGORY_NO_GO = 1;
+  ZONE_CATEGORY_SLOW_DOWN = 2;
+  ZONE_CATEGORY_RESTRICTED = 3;
+  ZONE_CATEGORY_WORK_AREA = 4;
+  ZONE_CATEGORY_NARROW = 5;
+}
+
+message Point2D {
+  double x = 1;
+  double y = 2;
+}
+
+message NogoZone {
+  option (entity_class) = ENTITY_CLASS_REACTIVE;
+
+  string zone_id = 1;
+  string map_id = 2;
+  string name = 3;
+  ZoneShape shape = 4;
+  ZoneCategory category = 5;
+  bool enabled = 6;
+  repeated Point2D points = 7;
+
+  uint64 created_at_ms = 10;
+  uint64 updated_at_ms = 11;
+}
+
+service NogoZonesService {
+  rpc ListNogoZones(ListNogoZonesRequest) returns (ListNogoZonesResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "nogo_zones.list";
+  }
+
+  rpc CreateNogoZone(CreateNogoZoneRequest) returns (CreateNogoZoneResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+
+    option (idempotent) = false;
+    option (rate_limit_key) = "nogo_zones.create";
+  }
+
+  rpc UpdateNogoZone(UpdateNogoZoneRequest) returns (UpdateNogoZoneResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+
+    option (idempotent) = true;
+    option (rate_limit_key) = "nogo_zones.update";
+  }
+
+  rpc DeleteNogoZone(DeleteNogoZoneRequest) returns (DeleteNogoZoneResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+
+    option (idempotent) = true;
+    option (rate_limit_key) = "nogo_zones.delete";
+  }
+}
+
+message ListNogoZonesRequest {
+  string map_id = 1;
+
+  ZoneCategory category = 10;
+  bool enabled_only = 11;
+}
+
+message ListNogoZonesResponse {
+  repeated NogoZone zones = 1;
+  uint32 total_count = 2;
+}
+
+message CreateNogoZoneRequest {
+  string map_id = 1;
+  string name = 2;
+  ZoneShape shape = 3;
+  ZoneCategory category = 4;
+  bool enabled = 5;
+  repeated Point2D points = 6;
+}
+
+message CreateNogoZoneResponse {
+  NogoZone zone = 1;
+}
+
+message UpdateNogoZoneRequest {
+  string zone_id = 1;
+
+  string name = 2;
+  ZoneShape shape = 3;
+  ZoneCategory category = 4;
+  bool enabled = 5;
+  repeated Point2D points = 6;
+
+}
+
+message UpdateNogoZoneResponse {
+  NogoZone zone = 1;
+}
+
+message DeleteNogoZoneRequest {
+  string zone_id = 1;
+
+}
+
+message DeleteNogoZoneResponse {
+
+}
+

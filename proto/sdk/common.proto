@@ -1,0 +1,63 @@
+syntax = "proto3";
+package karo.sdk;
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/sdk;sdk";
+
+enum SdkErrorCode {
+  SDK_ERROR_NONE = 0;
+
+  SDK_AUTH_FAILED = 1;
+  SDK_AUTH_CN_NOT_ALLOWED = 2;
+  SDK_AUTH_SERIAL_REVOKED = 3;
+  SDK_AUTH_TOKEN_INVALID = 4;
+  SDK_AUTH_TOKEN_EXPIRED = 5;
+  SDK_SESSION_TOKEN_INVALID = 10;
+  SDK_SESSION_TOKEN_EXPIRED = 11;
+  SDK_HANDSHAKE_REQUIRED = 12;
+  SDK_CAPABILITY_DENIED = 20;
+  SDK_RATE_LIMITED = 21;
+  SDK_UNSUPPORTED_VERSION = 22;
+  SDK_TOPIC_NOT_FOUND = 30;
+  SDK_TOPIC_ALREADY_SUBSCRIBED = 31;
+  SDK_TOPIC_NOT_SUBSCRIBED = 32;
+
+  SDK_DISCONNECTED = 40;
+  SDK_WOULD_DEADLOCK = 41;
+
+  CONTROL_REJECTED_CHARGING = 900;
+  CONTROL_REJECTED_ESTOP = 901;
+  CONTROL_REJECTED_MOTOR_FAULT = 902;
+  CONTROL_REJECTED_STEERING_FAULT = 903;
+  CONTROL_REJECTED_CAN_FAULT = 904;
+  CONTROL_REJECTED_TASK_RUNNING = 905;
+  CONTROL_REJECTED_POSE_ABNORMAL = 906;
+  CONTROL_REJECTED_SHUTTING_DOWN = 907;
+  CONTROL_REJECTED_OBSTACLE_TOO_CLOSE = 908;
+  CONTROL_REJECTED_NOT_READY = 910;
+}
+
+message SdkCapabilitySet {
+  bool chassis_control = 1;
+  bool telemetry_read = 2;
+  bool image_stream = 3;
+  bool map_read = 4;
+  bool map_write = 5;
+  bool task_control = 6;
+}
+
+enum TopicDeliverySemantics {
+
+  TOPIC_TELEMETRY = 0;
+
+  TOPIC_EVENT = 1;
+}
+
+message SdkTopicDescriptor {
+  string name = 1;
+  string description = 2;
+  float default_hz = 3;
+  float max_hz = 4;
+
+  TopicDeliverySemantics delivery_semantics = 5;
+}
+

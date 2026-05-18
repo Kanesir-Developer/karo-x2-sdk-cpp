@@ -1,0 +1,225 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/common.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+message Map {
+  option (entity_class) = ENTITY_CLASS_REACTIVE;
+
+  string map_id = 1;
+  string name = 2;
+  int32 floor = 3;
+  string description = 4;
+
+  bytes thumbnail_png = 5;
+
+  float resolution = 10;
+  uint32 width = 11;
+  uint32 height = 12;
+  double origin_x = 13;
+  double origin_y = 14;
+  double origin_theta = 15;
+
+  uint32 marker_count = 20;
+  uint32 nogo_zone_count = 21;
+
+  uint64 created_at_ms = 30;
+  uint64 updated_at_ms = 31;
+
+  bool is_active = 40;
+}
+
+message MapTile {
+  option (entity_class) = ENTITY_CLASS_CACHEABLE;
+
+  string map_id = 1;
+
+  uint64 version = 2;
+  bytes etag = 3;
+
+  float resolution = 10;
+  uint32 width = 11;
+  uint32 height = 12;
+  double origin_x = 13;
+  double origin_y = 14;
+  double origin_theta = 15;
+
+  bytes image_data = 20;
+  string image_encoding = 21;
+}
+
+service MapsService {
+
+  rpc ListMaps(ListMapsRequest) returns (ListMapsResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "maps.list";
+  }
+
+  rpc GetMap(GetMapRequest) returns (GetMapResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "maps.get";
+  }
+
+  rpc GetActiveMap(GetActiveMapRequest) returns (GetActiveMapResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "maps.get_active";
+  }
+
+  rpc SetActiveMap(SetActiveMapRequest) returns (SetActiveMapResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+
+    option (idempotent) = true;
+    option (rate_limit_key) = "maps.set_active";
+  }
+
+  rpc GetMapTile(GetMapTileRequest) returns (GetMapTileResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "maps.get_tile";
+  }
+
+  rpc SetInitialPose(SetInitialPoseRequest) returns (SetInitialPoseResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (rate_limit_key) = "maps.set_initial_pose";
+  }
+
+  rpc GetMapDetail(GetMapDetailRequest) returns (GetMapDetailResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "maps.get_detail";
+  }
+
+  rpc DeleteMap(DeleteMapRequest) returns (DeleteMapResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (rate_limit_key) = "maps.delete";
+  }
+
+  rpc CloneFloor(CloneFloorRequest) returns (CloneFloorResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (rate_limit_key) = "maps.clone_floor";
+  }
+}
+
+message ListMapsRequest {
+  uint32 page = 1;
+  uint32 page_size = 2;
+  string keyword = 10;
+
+  int32 floor_filter = 11;
+}
+
+message ListMapsResponse {
+  repeated Map maps = 1;
+  uint32 total_count = 2;
+  uint32 page = 3;
+  uint32 page_size = 4;
+}
+
+message GetMapRequest {
+  string map_id = 1;
+}
+
+message GetMapResponse {
+  Map map = 1;
+}
+
+message GetActiveMapRequest {
+
+}
+
+message GetActiveMapResponse {
+
+  Map map = 1;
+}
+
+message SetActiveMapRequest {
+  string map_id = 1;
+  int32 floor = 2;
+}
+
+message SetActiveMapResponse {
+  Map map = 1;
+}
+
+message GetMapTileRequest {
+  string map_id = 1;
+
+  bytes if_none_match_etag = 10;
+
+  uint64 if_none_match_version = 11;
+}
+
+message GetMapTileResponse {
+
+  MapTile tile = 1;
+
+  bool not_modified = 2;
+}
+
+message Pose2D {
+  double x = 1;
+  double y = 2;
+  double theta = 3;
+}
+
+message SetInitialPoseRequest {
+  string map_id = 1;
+  Pose2D pose = 2;
+  string floor = 3;
+}
+
+message SetInitialPoseResponse {
+  uint64 timestamp_ms = 1;
+  bool applied = 2;
+
+  optional bool slam_matched = 3;
+  optional float match_score = 4;
+  optional string failure_reason = 5;
+}
+
+message GetMapDetailRequest {
+  string map_id = 1;
+  bool include_image = 2;
+
+}
+
+message GetMapDetailResponse {
+  Map map = 1;
+  MapTile tile = 2;
+}
+
+message DeleteMapRequest {
+  string map_id = 1;
+}
+
+message DeleteMapResponse {
+  uint64 timestamp_ms = 1;
+}
+
+message CloneFloorRequest {
+  string source_map_id = 1;
+  int32 target_floor = 2;
+  string new_name = 3;
+}
+
+message CloneFloorResponse {
+  Map cloned_map = 1;
+}
+

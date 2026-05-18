@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/common.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+enum MarkerType {
+  MARKER_TYPE_UNSPECIFIED = 0;
+  MARKER_TYPE_NORMAL = 1;
+  MARKER_TYPE_CHARGING = 2;
+  MARKER_TYPE_ELEVATOR = 3;
+  MARKER_TYPE_DOOR = 4;
+}
+
+message Marker {
+  option (entity_class) = ENTITY_CLASS_REACTIVE;
+
+  string marker_id = 1;
+  string map_id = 2;
+  string name = 3;
+  MarkerType type = 4;
+
+  double x = 10;
+  double y = 11;
+  double theta = 12;
+
+  string description = 20;
+  string extra_data = 21;
+
+  uint64 created_at_ms = 30;
+  uint64 updated_at_ms = 31;
+}
+
+service MarkersService {
+  rpc ListMarkers(ListMarkersRequest) returns (ListMarkersResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "markers.list";
+  }
+
+  rpc GetMarker(GetMarkerRequest) returns (GetMarkerResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "markers.get";
+  }
+
+  rpc CreateMarker(CreateMarkerRequest) returns (CreateMarkerResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+
+    option (idempotent) = false;
+    option (rate_limit_key) = "markers.create";
+  }
+
+  rpc UpdateMarker(UpdateMarkerRequest) returns (UpdateMarkerResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+
+    option (idempotent) = true;
+    option (rate_limit_key) = "markers.update";
+  }
+
+  rpc DeleteMarker(DeleteMarkerRequest) returns (DeleteMarkerResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+    option (idempotent) = true;
+    option (rate_limit_key) = "markers.delete";
+  }
+}
+
+message ListMarkersRequest {
+  string map_id = 1;
+  MarkerType type_filter = 2;
+}
+
+message ListMarkersResponse {
+  repeated Marker markers = 1;
+  uint32 total_count = 2;
+}
+
+message GetMarkerRequest {
+  string marker_id = 1;
+}
+
+message GetMarkerResponse {
+  Marker marker = 1;
+}
+
+message CreateMarkerRequest {
+  string map_id = 1;
+  string name = 2;
+  MarkerType type = 3;
+  double x = 4;
+  double y = 5;
+  double theta = 6;
+  string description = 7;
+  string extra_data = 8;
+}
+
+message CreateMarkerResponse {
+  Marker marker = 1;
+}
+
+message UpdateMarkerRequest {
+  string marker_id = 1;
+
+  string name = 2;
+  MarkerType type = 3;
+  double x = 4;
+  double y = 5;
+  double theta = 6;
+  string description = 7;
+  string extra_data = 8;
+
+  repeated string update_mask = 10;
+  string operator_id = 11;
+}
+
+message UpdateMarkerResponse {
+  Marker marker = 1;
+}
+
+message DeleteMarkerRequest {
+  string marker_id = 1;
+}
+
+message DeleteMarkerResponse {
+
+}
+

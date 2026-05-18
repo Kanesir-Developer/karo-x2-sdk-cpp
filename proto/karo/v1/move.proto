@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package karo.v1;
+
+import "karo/v1/common.proto";
+import "karo/v1/tasks.proto";
+
+option go_package = "github.com/Kanesir-Developer/karo-x2-sdk-go/proto/karo/v1;karov1";
+option java_package = "com.kanesir.karo.sdk.gen.v1";
+option java_multiple_files = true;
+
+service MoveService {
+
+  rpc CreateTask(CreateMoveTaskRequest) returns (CreateMoveTaskResponse) {
+    option (visibility) = VISIBILITY_PUBLIC;
+    option (rpc_qos) = QOS_CLASS_CRITICAL;
+
+    option (idempotent) = false;
+    option (rate_limit_key) = "move.create_task";
+  }
+}
+
+message PoseTarget {
+  double x = 1;
+  double y = 2;
+  double theta = 3;
+}
+
+message CreateMoveTaskRequest {
+
+  oneof target {
+    string marker_id = 1;
+    PoseTarget pose = 3;
+  }
+
+  uint64 client_timestamp_ms = 2;
+}
+
+message CreateMoveTaskResponse {
+
+  Task task = 1;
+}
+
